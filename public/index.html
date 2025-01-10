@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Data Webscraper</title>
+    <title>Stock Data Webscaper</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Press+Start+2P&display=swap"
@@ -17,8 +18,12 @@
             color: #202124;
         }
 
-        h1, h2, h3, input, button {
-            font-family: 'Press Start 2p', system-ui;
+        h1,
+        h2,
+        h3,
+        input,
+        button {
+            font-family: 'Press Start 2P', system-ui;
         }
 
         body {
@@ -28,13 +33,14 @@
             padding: 14px;
             gap: 14px;
         }
-        
+
         header {
             display: flex;
             align-items: stretch;
         }
 
-        header, main {
+        header,
+        main {
             max-width: 800px;
             width: 100%;
             margin: 0 auto;
@@ -59,7 +65,8 @@
             opacity: 0.7;
         }
 
-        header button, header input {
+        header button,
+        header input {
             box-shadow: 2px 2px 6px 2px rgb(235, 250, 255);
             padding: 14px 18px;
             border: none;
@@ -71,21 +78,53 @@
         }
 
         @media (min-width: 640px) {
-            header button, header input {
+
+            header button,
+            header input {
                 font-size: 1.2em;
             }
 
-            p{
+            p {
                 font-size: 1em;
             }
         }
     </style>
 </head>
+
 <body>
     <header>
         <input id="ticker" placeholder="Enter stock ticker ..." />
         <button>Search</button>
     </header>
     <main></main>
+    <script>
+        let tickerInput = document.getElementById('ticker')
+        let sendBtn = document.querySelector('button')
+        let mainContainer = document.querySelector('main')
+
+        async function fetchStockData() {
+            let stock_ticker = tickerInput.value
+            if (!stock_ticker) { return }
+
+            try {
+                const backend_url = '/api'
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({ stock_ticker })
+                }
+                const res = await fetch(backend_url, options)
+                const { prices } = await res.json()
+                mainContainer.innerText = prices.join('\n')
+            } catch (err) {
+                console.log(err.message)
+            }
+        }
+
+        sendBtn.addEventListener('click', fetchStockData)
+    </script>
 </body>
+
 </html>

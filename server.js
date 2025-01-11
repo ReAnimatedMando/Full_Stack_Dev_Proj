@@ -1,51 +1,35 @@
 // step 1 - define the web scraper
 
-const cheerio = require('cheerio')
+const puppeteer = require('puppeteer')
 
-let stockTicker = 'pypl'
-let type = 'history'
+async function scrapeData(url) {
+    if (!url) {return}
+    const browser = await puppeteer.launch({headless: true})
+    const page = await browser.newPage()
+    await page.goto(url)
+    await page.waitForSelector(`td:nth-child(6)`)
 
-async function scrapeData(ticker) {
+    const data = await page.evaluate(() => {
+        const elements = document.querySelectorAll('td:nth-child(6)')
+        return Array.from(elements).map(element => element.textContent.trim())
+    })
+
+    await browser.close()
+    return data
+}
+
+(async () => {
     try {
-        // step a - fetch the page html
-        const url = `https://finance.yahoo.com/quote/${ticker}/${type}?p=${ticker}`
-        const res = await fetch(url)
-        const html = await res.text()
+        const data = await scrapeData('https://finance.yahoo.com/quote/PYPL/history/')
 
-        const $ = cheerio.load(html)
-        const price_history = getPrices($)
-        return price_history
-        console.log(price_history)
-    } catch (err) {
-        console.log(err.message)
+        console.log(data)
+    } catch (error) {
+        console.error('Error', error)
     }
-}
+})()
 
-async function fetchHTML(ticker, type) {
-    const url = `https://finance.yahoo.com/quote/${ticker}/${type}?p=${ticker}`
-    let headers = {
-        "Content-Type": "application/json",
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://www.google.com/',
-        'Connection': 'keep-alive',
-    }
-    const res = await fetch(url, {
-        method: 'GET',
-        headers: headers
-    })
-    const html = await res.text()
-    return html
-    const $ = cheerio.load(html)
-}
+module.exports = {scrapeData}
 
-function getPrices(cher) {
-    const prices = cher('td:nth-child(6)').get().map((current_value) => {
-        return cher(current_value).text()
-    })
-    return prices
-}
 
 // step 2 - initialize server that serves up an html file that the user can play with
 

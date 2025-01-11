@@ -47,11 +47,26 @@ function getPrices(cher) {
     return prices
 }
 
-scrapeData()
-
 // step 2 - initialize server that serves up an html file that the user can play with
 
+const express = require('express')
+const app = express()
+const port = 8383
 
+// middleware
+
+app.use(express.json())
+app.use(require('cors')())
+app.use(express.static('public'))
+
+app.listen(port, () => {console.log(`Server has started on port: ${port}`)})
 
 // step 3 - define api endpoints to access stock data (and call webscraper)
+
+app.post('/api', async (req, res) => {
+    const {stock_ticker: ticker} = req.body
+    console.log(ticker)
+    const prices = await scrapeData(ticker)
+    res.statusCode(200).send({ prices })
+})
 

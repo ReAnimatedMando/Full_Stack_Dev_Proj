@@ -116,6 +116,7 @@
                     body: JSON.stringify({ stock_ticker })
                 }
                 const res = await fetch(backend_url, options)
+                const data = await res.json()
                 const { prices } = await res.json()
                 mainContainer.innerText = prices.join('\n')
             } catch (err) {
